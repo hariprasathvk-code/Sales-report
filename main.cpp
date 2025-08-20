@@ -277,3 +277,48 @@ void DeleteRecord() {
     else cout << "SaleID not found.\n";
 }
 
+bool isSalesEmpty() {
+    ifstream fin("sales.csv");
+    return !fin.good() || fin.peek() == ifstream::traits_type::eof();
+}
+
+bool isSorted() {
+    ifstream fin("sales.csv");
+    string line;
+    string prevDate = "";
+    while (getline(fin, line)) {
+        stringstream ss(line);
+        string saleID, date, item, qty, price;
+        getline(ss, saleID, ','); getline(ss, date, ','); getline(ss, item, ','); getline(ss, qty, ','); getline(ss, price, ',');
+        string reportDate = toReportFormat(date);
+        if (!prevDate.empty() && prevDate > reportDate) return false;
+        prevDate = reportDate;
+    }
+    return true;
+}
+
+void Process() {
+    ifstream fin("sales.csv");
+    vector<Sale> records;
+    string line;
+    while (getline(fin, line)) {
+        stringstream ss(line);
+        Sale s;
+        string qty, price;
+        getline(ss, s.saleID, ','); getline(ss, s.date, ','); getline(ss, s.itemName, ','); getline(ss, qty, ','); getline(ss, price, ',');
+        s.quantity = stoi(qty);
+        s.unitPrice = stod(price);
+        records.push_back(s);
+    }
+    fin.close();
+
+    sort(records.begin(), records.end(), compareByDate);
+
+    ofstream fout("temp.csv");
+    for (auto &s : records) {
+        fout << s.saleID << "," << s.date << "," << s.itemName << "," << s.quantity << "," << s.unitPrice << "\n";
+    }
+    fout.close();
+    cout << "Data sorted and saved to temp.csv\n";
+}
+
