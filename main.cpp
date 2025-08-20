@@ -93,6 +93,7 @@ void Initialization() {
     cin >> n;
 
     ofstream fout("sales.csv", ios::trunc); // overwrite file
+    fout << "SaleID,Date,Item Name,Quantity,Unit Price\n";
     for (int i = 0; i < n; i++) {
         Sale s;
 
@@ -145,7 +146,7 @@ void CreateRecord() {
     ifstream fin("sales.csv");
     vector<Sale> records;
     string line;
-    getline(fin, line); 
+    getline(fin, line); // skip header
     while (getline(fin, line)) {
         stringstream ss(line);
         Sale s;
@@ -187,15 +188,20 @@ void ReadRecords() {
     ifstream fin("sales.csv");
     if (!fin) { cout << "No file found.\n"; return; }
 
-        cout << "\n     Sales Records \n";
-        cout << left << setw(10) << "SaleID" << setw(12) << "Date" << setw(15) << "Item Name" << setw(10) << "Qty" << setw(10) << "Price" << "\n";
-
     string line;
+    getline(fin, line); // skip header
+    cout << "\n     Sales Records \n";
+    cout << left << setw(10) << "SaleID" << setw(12) << "Date" 
+         << setw(15) << "Item Name" << setw(10) << "Qty" 
+         << setw(10) << "Price" << "\n";
+
     while (getline(fin, line)) {
         stringstream ss(line);
         string saleID, date, item, qty, price;  
         getline(ss, saleID, ','); getline(ss, date, ','); getline(ss, item, ','); getline(ss, qty, ','); getline(ss, price, ',');
-        cout << left << setw(10) << saleID << setw(12) << date << setw(15) << item << setw(10) << qty << setw(10) << price << "\n";
+        cout << left << setw(10) << saleID << setw(12) << date 
+             << setw(15) << item << setw(10) << qty 
+             << setw(10) << price << "\n";
     }
     fin.close();
 }
@@ -207,6 +213,7 @@ void UpdateRecord() {
     ifstream fin("sales.csv");
     vector<Sale> records;
     string line;
+    getline(fin, line); // skip header
     while (getline(fin, line)) {
         stringstream ss(line);
         Sale s;
@@ -236,6 +243,7 @@ void UpdateRecord() {
     }
 
     ofstream fout("sales.csv", ios::trunc);
+    fout << "SaleID,Date,Item Name,Quantity,Unit Price\n";
     for (auto &s : records) {
         fout << s.saleID << "," << s.date << "," << s.itemName << "," << s.quantity << "," << s.unitPrice << "\n";
     }
@@ -252,6 +260,7 @@ void DeleteRecord() {
     ifstream fin("sales.csv");
     vector<Sale> records;
     string line;
+    getline(fin, line); // skip header
     while (getline(fin, line)) {
         stringstream ss(line);
         Sale s;
@@ -268,6 +277,7 @@ void DeleteRecord() {
         [&](Sale &s) { return s.saleID == id; }), records.end());
 
     ofstream fout("sales.csv", ios::trunc);
+    fout << "SaleID,Date,Item Name,Quantity,Unit Price\n";
     for (auto &s : records) {
         fout << s.saleID << "," << s.date << "," << s.itemName << "," << s.quantity << "," << s.unitPrice << "\n";
     }
@@ -285,6 +295,7 @@ bool isSalesEmpty() {
 bool isSorted() {
     ifstream fin("sales.csv");
     string line;
+    getline(fin, line); // skip header
     string prevDate = "";
     while (getline(fin, line)) {
         stringstream ss(line);
@@ -301,6 +312,7 @@ void Process() {
     ifstream fin("sales.csv");
     vector<Sale> records;
     string line;
+    getline(fin, line); // skip header
     while (getline(fin, line)) {
         stringstream ss(line);
         Sale s;
@@ -315,6 +327,7 @@ void Process() {
     sort(records.begin(), records.end(), compareByDate);
 
     ofstream fout("temp.csv");
+    fout << "SaleID,Date,Item Name,Quantity,Unit Price\n";
     for (auto &s : records) {
         fout << s.saleID << "," << s.date << "," << s.itemName << "," << s.quantity << "," << s.unitPrice << "\n";
     }
@@ -324,6 +337,9 @@ void Process() {
 
 void FileConversion() {
     ifstream fin("temp.csv");
+    string line;
+    getline(fin, line); // skip header
+
     ofstream fout("Report.txt");
     time_t now = time(0);
     tm *ltm = localtime(&now);
@@ -335,8 +351,8 @@ void FileConversion() {
     fout << left << setw(12) << "Date" << setw(10) << "SaleID" << setw(15) << "Item Name" << setw(10) << "Quantity" << setw(10) << "Unit Price" << setw(12) << "SalesAmount" << "\n";
     fout << "---------------------------------------------------------------\n";
 
-    string line, prevDate = "";
-    double dailyTotal = 0, grandTotal = 0;   // added grandTotal
+    string prevDate = "";
+    double dailyTotal = 0, grandTotal = 0;
 
     while (getline(fin, line)) {
         stringstream ss(line);
@@ -355,7 +371,7 @@ void FileConversion() {
 
         fout << left << setw(12) << reportDate << setw(10) << saleID << setw(15) << item << setw(10) << qty << setw(10) << price << setw(12) << amount << "\n";
         dailyTotal += amount;
-        grandTotal += amount;   // accumulate into grand total
+        grandTotal += amount;
         prevDate = reportDate;
     }
 
@@ -373,6 +389,7 @@ void FileConversion() {
     fout.close();
     cout << "Report.txt generated \n";
 }
+
 void Termination() {
     cout << "    End of Program \n";
 }
