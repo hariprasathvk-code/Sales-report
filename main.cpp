@@ -322,3 +322,57 @@ void Process() {
     cout << "Data sorted and saved to temp.csv\n";
 }
 
+void FileConversion() {
+    ifstream fin("temp.csv");
+    ofstream fout("Report.txt");
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    char dateStr[11];
+    strftime(dateStr, sizeof(dateStr), "%d-%m-%Y", ltm);
+
+    fout << "Compiled Date: " << dateStr << "\n";
+    fout << "Sales Report : Stationary Items Sold\n\n";
+    fout << left << setw(12) << "Date" << setw(10) << "SaleID" << setw(15) << "Item Name" << setw(10) << "Quantity" << setw(10) << "Unit Price" << setw(12) << "SalesAmount" << "\n";
+    fout << "---------------------------------------------------------------\n";
+
+    string line, prevDate = "";
+    double dailyTotal = 0, grandTotal = 0;   // added grandTotal
+
+    while (getline(fin, line)) {
+        stringstream ss(line);
+        string saleID, date, item, qtyStr, priceStr;
+        getline(ss, saleID, ','); getline(ss, date, ','); getline(ss, item, ','); getline(ss, qtyStr, ','); getline(ss, priceStr, ',');
+        int qty = stoi(qtyStr);
+        double price = stod(priceStr);
+        double amount = qty * price;
+        string reportDate = toReportFormat(date);
+        if (!prevDate.empty() && prevDate != reportDate) {
+            fout << "---------------------------------------------------------------\n";
+            fout << "Subtotal for " << prevDate << " : " << dailyTotal << "\n";
+            fout << "---------------------------------------------------------------\n\n\n";
+            dailyTotal = 0;
+        }
+
+        fout << left << setw(12) << reportDate << setw(10) << saleID << setw(15) << item << setw(10) << qty << setw(10) << price << setw(12) << amount << "\n";
+        dailyTotal += amount;
+        grandTotal += amount;   // accumulate into grand total
+        prevDate = reportDate;
+    }
+
+    if (!prevDate.empty()) {
+        fout << "---------------------------------------------------------------\n";
+        fout << "Subtotal for " << prevDate << " : " << dailyTotal << "\n";
+        fout << "---------------------------------------------------------------\n\n";
+    }
+    
+    fout << "\n";
+    fout << "=================================================================\n";
+    fout << "Grand Total: " << grandTotal << "\n";
+
+    fin.close();
+    fout.close();
+    cout << "Report.txt generated \n";
+}
+void Termination() {
+    cout << "    End of Program \n";
+}
